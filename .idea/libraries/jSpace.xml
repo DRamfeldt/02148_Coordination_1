@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="jSpace">
+    <CLASSES>
+      <root url="file://$USER_HOME$/OneDrive/Dokumenter/jSpace" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$USER_HOME$/OneDrive/Dokumenter/jSpace/common/src/main/java" />
+      <root url="file://$USER_HOME$/OneDrive/Dokumenter/jSpace/common/src/test/java" />
+      <root url="file://$USER_HOME$/OneDrive/Dokumenter/jSpace/examples/HelloWorld/src/main/java" />
+      <root url="file://$USER_HOME$/OneDrive/Dokumenter/jSpace/examples/PingPong/src/main/java" />
+      <root url="file://$USER_HOME$/OneDrive/Dokumenter/jSpace/examples/ProducerConsumer/src/main/java" />
+    </SOURCES>
+  </library>
+</component>
