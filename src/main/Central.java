@@ -1,8 +1,6 @@
 package main;
 
-import org.jspace.Space;
 import org.jspace.*;
-
 
 public class Central {
     private static Space inventory;
