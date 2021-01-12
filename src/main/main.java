@@ -6,20 +6,30 @@ public class main {
     public static void main(String[] args) throws InterruptedException {
         Space arlaProducts = new SequentialSpace();
 
-        arlaProducts.put(new ActualField("milk"));
-        arlaProducts.put(new ActualField("yogurt"));
+        arlaProducts.put("milk");
+        arlaProducts.put("yogurt");
 
+        Space centralInv = new SequentialSpace();
+        centralInv.put("milk",0);
+        centralInv.put("yogurt",0);
+
+        Central Netto = new Central(centralInv);
         Supplier Arla = new Supplier(arlaProducts);
+
+        Netto.addSupplier(Arla, "milk");
+        Netto.addSupplier(Arla, "yogurt");
+
         Space storeInv = new SequentialSpace();
-        storeInv.put(new ActualField("milk"), new ActualField(20));
-        storeInv.put(new ActualField("yogurt"), new ActualField(15));
+        storeInv.put("milk", 20);
+        storeInv.put("yogurt", 15);
         Space storeStdInv = new SequentialSpace();
-        storeStdInv.put(new ActualField("milk"), new ActualField(15));
-        storeStdInv.put(new ActualField("yogurt"), new ActualField(10));
+        storeStdInv.put("milk", 15);
+        storeStdInv.put("yogurt", 10);
 
-        Store Søborg = new Store(storeInv, storeStdInv);
+        Store Søborg = new Store(storeInv, storeStdInv, Netto);
 
 
-
+        Søborg.sale("yogurt", 12);
+        new Thread(Netto).start();
     }
 }

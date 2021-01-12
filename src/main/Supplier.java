@@ -3,7 +3,6 @@ package main;
 import org.jspace.*;
 
 public class Supplier implements Runnable {
-
     private Space catalogue;
     private Space requests = new SequentialSpace();
 
@@ -11,8 +10,8 @@ public class Supplier implements Runnable {
         this.catalogue = catalogue;
     }
 
-    public void Request(String Item, Integer Amount) throws InterruptedException {
-        requests.put(Item, Amount);
+    public void request(String Item, Integer Amount, Central central) throws InterruptedException {
+        requests.put(Item, Amount, central);
     }
 
     public void run() {
@@ -23,7 +22,7 @@ public class Supplier implements Runnable {
             String item    = (String)  request[0];
             Integer amount = (Integer) request[1];
             if (itemInCatalogue != null) {
-                Central.AddToInventory(item, amount);
+                System.out.println("This item is not in the catalogue.");
             } else {
                 System.out.println("Supplier item not available");
             }  } catch (InterruptedException e) {
