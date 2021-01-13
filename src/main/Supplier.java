@@ -16,11 +16,20 @@ public class Supplier implements Runnable {
         this.suppliers = suppliers;
     }
 
+    public Boolean hasItem(String item) throws InterruptedException {
+        return catalogue.queryp(new ActualField(item)) != null;
+    }
+
     public void request(String item, Integer amount, Central central) throws InterruptedException {
-        if (catalogue.queryp(new ActualField(item)) != null) {
+        if (hasItem(item)) {
             central.addToInventory(item, amount);
         } else {
             Object[] recipe = catalogue.queryp(new ActualField(item), new FormalField(ArrayList.class));
+            ArrayList<String> ingredients = (ArrayList<String>) recipe[1];
+            for (String ingredient : ingredients){
+                initShortestPath(ingredient);
+            }
+            /*
             if (recipe != null) {
                 ArrayList<String> ingredients = (ArrayList<String>) recipe[1];
                 List<Object[]> tosendto = suppliers.queryAll();
@@ -34,6 +43,16 @@ public class Supplier implements Runnable {
                 }
                 central.addToInventory(item, amount);
             }
+
+             */
+        }
+    }
+
+    private void initShortestPath(String item) throws InterruptedException {
+        List<Object[]> adjacentSuppliers = suppliers.queryAll();
+        for (Object[] adj : adjacentSuppliers){
+            Supplier s = (Supplier) adj[0];
+            int distance = (int) adj[1];
         }
     }
 
