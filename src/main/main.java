@@ -2,6 +2,8 @@ package main;
 
 import org.jspace.*;
 
+import java.util.ArrayList;
+
 public class main {
     public static void main(String[] args) throws InterruptedException {
         /*
@@ -40,10 +42,25 @@ public class main {
 
         plasticProducts.put("container");
         arlaProducts.put("milk");
-        arlaProducts.put("yogurt");
+        ArrayList<String> o = new ArrayList<String>();
+        o.add("container");
+        arlaProducts.put("yogurt", o);
 
         Supplier plasticFactory = new Supplier(plasticProducts, new QueueSpace());
         Supplier Arla = new Supplier(arlaProducts, new QueueSpace());
+
+        plasticFactory.addAdjacent(Arla,9);
+        Arla.addAdjacent(plasticFactory,9);
+
+
+        Central c = new Central(new SequentialSpace());
+        c.addSupplier(Arla, "milk");
+        c.addSupplier(Arla, "yogurt");
+        c.addSupplier(plasticFactory, "container");
+
+        c.supplierRequest("yogurt",1);
+
+
 
     }
 }

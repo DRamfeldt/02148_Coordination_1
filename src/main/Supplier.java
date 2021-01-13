@@ -5,6 +5,7 @@ import org.jspace.*;
 import java.util.ArrayList;
 
 import java.util.Iterator;
+import java.util.List;
 
 public class Supplier implements Runnable {
     private Space catalogue;                        // (String item) || (String item, ArrayList<String>)
@@ -19,6 +20,32 @@ public class Supplier implements Runnable {
         if (catalogue.queryp(new ActualField(item)) != null) {
             central.addToInventory(item, amount);
         } else {
+            Object[] recipe = catalogue.queryp(new ActualField(item), new FormalField(ArrayList.class));
+            if (recipe != null) {
+                ArrayList<String> ingredients = (ArrayList<String>) recipe[1];
+                List<Object[]> tosendto = suppliers.queryAll();
+                for (Object[] i : tosendto) {
+                    Supplier s = (Supplier) i[0];
+                    int distance = (int) i[1];
+                    for (String j : ingredients) {
+                        s.supplierRequest(j, 1, this)
+                    }
+
+                }
+                central.addToInventory(item, amount);
+            }
+        }
+    }
+
+    public boolean supplierRequest(String item, Integer amount, Supplier supplier) throws InterruptedException {
+        if (catalogue.queryp(new ActualField(item)) != null) {
+            return true;
+        } else {
+            Object[] recipe = catalogue.queryp(new ActualField(item), new FormalField(ArrayList.class));
+            if (recipe != null) {
+                supplierRequest()
+                return
+            }
 
         }
     }
@@ -44,4 +71,7 @@ public class Supplier implements Runnable {
     }
 
 
+    public void addAdjacent(Supplier s, Integer i) throws InterruptedException {
+        suppliers.put(s,i);
+    }
 }

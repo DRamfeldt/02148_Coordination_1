@@ -3,12 +3,11 @@ package main;
 import org.jspace.*;
 
 public class Central implements Runnable {
-    private Space inventory;
+    private Space inventory = new SequentialSpace();
     private Space suppliers = new SequentialSpace();
     private Space requests = new SequentialSpace();
 
-    public Central(Space inventory) {
-        this.inventory = inventory;
+    public Central(Space suppliers) { this.suppliers=suppliers;
     }
 
     public void addSupplier(Supplier S, String Item) throws InterruptedException {
