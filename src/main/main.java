@@ -4,6 +4,7 @@ import org.jspace.*;
 
 public class main {
     public static void main(String[] args) throws InterruptedException {
+        /*
         Space arlaProducts = new SequentialSpace();
 
         arlaProducts.put("milk");
@@ -31,5 +32,7 @@ public class main {
 
         Søborg.sale("yogurt", 12);
         new Thread(Netto).start();
+
+        */
     }
 }

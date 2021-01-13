@@ -13,7 +13,6 @@ public class Store {
         this.inventory = inventory;
         this.standardInv = standardInv;
         central = c;
-
     }
 
     public void addToInventory(String Item, Integer Amount) throws InterruptedException {

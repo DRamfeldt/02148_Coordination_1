@@ -4,7 +4,7 @@ import org.jspace.*;
 
 public class Central implements Runnable {
     private Space inventory;
-    private Space Suppliers = new SequentialSpace();
+    private Space suppliers = new SequentialSpace();
     private Space requests = new SequentialSpace();
 
     public Central(Space inventory) {
@@ -12,23 +12,23 @@ public class Central implements Runnable {
     }
 
     public void addSupplier(Supplier S, String Item) throws InterruptedException {
-        Suppliers.put(S, Item);
+        suppliers.put(S, Item);
     }
 
     public void addToInventory(String item, Integer amount) throws InterruptedException {
         inventory.put(item, amount);
     }
 
-    public void supplierRequest(String item, Integer amount) throws InterruptedException {
-        Object[] S = Suppliers.query(new FormalField(Supplier.class), new ActualField(item));
-        Supplier supplier = (Supplier) S[0];
-        supplier.request(item, amount, this);
-        System.out.println("Request sent to supplier for " + item);
+    public void request(String item, Integer amount, Store s) throws InterruptedException {
+        requests.put(item, amount, s);
+        System.out.println("Request sent for " + item);
     }
 
-    public void request(String item, Integer amount, Store S) throws InterruptedException {
-        requests.put(item, amount, S);
-        System.out.println("Request sent for " + item);
+    public void supplierRequest(String item, Integer amount) throws InterruptedException {
+        Object[] s = suppliers.query(new FormalField(Supplier.class), new ActualField(item));
+        Supplier supplier = (Supplier) s[0];
+        supplier.request(item,amount, this);
+        System.out.println("Request sent to supplier for " + item);
     }
 
     public void run() {
