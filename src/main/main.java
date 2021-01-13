@@ -34,5 +34,16 @@ public class main {
         new Thread(Netto).start();
 
         */
+
+        Space arlaProducts = new SequentialSpace();
+        Space plasticProducts = new SequentialSpace();
+
+        plasticProducts.put("container");
+        arlaProducts.put("milk");
+        arlaProducts.put("yogurt");
+
+        Supplier plasticFactory = new Supplier(plasticProducts, new QueueSpace());
+        Supplier Arla = new Supplier(arlaProducts, new QueueSpace());
+
     }
 }
