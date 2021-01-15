@@ -36,31 +36,51 @@ public class main {
         new Thread(Netto).start();
 
         */
-
+        ArrayList<String> o = new ArrayList<String>();
         Space arlaProducts = new SequentialSpace();
         Space plasticProducts = new SequentialSpace();
+        Space oilProducts = new SequentialSpace();
+        Space stickers = new SequentialSpace();
 
-        plasticProducts.put("container");
-        arlaProducts.put("milk");
-        ArrayList<String> o = new ArrayList<String>();
+        o = new ArrayList<String>();
+        o.add("plastic");
+        o.add("sticker");
+        plasticProducts.put("container",o);
+
+
+        oilProducts.put("plastic");
+
+        stickers.put("sticker");
+
+        o = new ArrayList<String>();
         o.add("container");
         arlaProducts.put("yogurt", o);
+        arlaProducts.put("milk");
 
-        Supplier plasticFactory = new Supplier(plasticProducts, new QueueSpace());
-        Supplier Arla = new Supplier(arlaProducts, new QueueSpace());
+        Supplier Refinery = new Supplier(oilProducts, "Refinery");
+        Supplier StickerFactory = new Supplier(stickers, "Sticker Factory");
+        Supplier PlasticFactory = new Supplier(plasticProducts, "Plastic Factory");
+        Supplier Arla = new Supplier(arlaProducts, "Arla");
 
-        plasticFactory.addAdjacent(Arla,9);
-        Arla.addAdjacent(plasticFactory,9);
-
-
-        Central c = new Central(new SequentialSpace());
-        c.addSupplier(Arla, "milk");
-        c.addSupplier(Arla, "yogurt");
-        c.addSupplier(plasticFactory, "container");
-
-        c.supplierRequest("yogurt",1);
+        Arla.addConnection(StickerFactory,5);
+        Refinery.addConnection(StickerFactory, 9);
+        StickerFactory.addConnection(PlasticFactory,4);
+        StickerFactory.addConnection(Arla,5);
+        StickerFactory.addConnection(Refinery,9);
 
 
+
+        Tuple centralNeighbors = new Tuple(Arla,Refinery);
+        Central c = new Central(centralNeighbors);
+
+        System.out.println("==========================");
+        c.supplierRequest("yogurt",5);
+        System.out.println("==========================");
+        c.supplierRequest("container",1);
+        System.out.println("==========================");
+        c.supplierRequest("milk",3);
+        System.out.println("==========================");
+        c.supplierRequest("plastic",1000);
 
     }
 }

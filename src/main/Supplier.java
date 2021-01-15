@@ -2,75 +2,89 @@ package main;
 
 
 import org.jspace.*;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import java.util.Iterator;
 import java.util.List;
 
-public class Supplier implements Runnable {
+public class Supplier {
     private Space catalogue;                        // (String item) || (String item, ArrayList<String>)
-    private Space suppliers;                        // Queue space : (Supplier s, int distance)
+    private Space suppliers = new QueueSpace();                        // Queue space : (Supplier s, int distance)
+    public String name;
 
-    public Supplier(Space catalogue, QueueSpace suppliers) {
+    public Supplier(Space catalogue, String name) {
         this.catalogue = catalogue;
-        this.suppliers = suppliers;
+        this.name = name;
+    }
+    public void addConnection(Supplier s, int i) throws InterruptedException {
+        suppliers.put(s,i);
     }
 
-    public Boolean hasItem(String item) throws InterruptedException {
-        return catalogue.queryp(new ActualField(item)) != null;
+    private List<Supplier> fetchConnections() throws InterruptedException {
+        List<Object[]> connections = suppliers.queryAll(new FormalField(Supplier.class), new FormalField(Integer.class));
+        List<Supplier> result = new ArrayList<Supplier>();
+        for (Object[] s : connections) {
+            Supplier i = (Supplier) s[0];
+            result.add(i);
+        }
+        return result;
     }
 
-    public void request(String item, Integer amount, Central central) throws InterruptedException {
-        if (hasItem(item)) {
-            central.addToInventory(item, amount);
-        } else {
+    private List<String> stringify(List<Supplier> l) {
+        Iterator o = l.iterator();
+        List<String> stringified = new ArrayList<>();
+        while(o.hasNext()) {
+            Supplier p = (Supplier) o.next();
+            stringified.add(p.name);
+        }
+        return stringified;
+    }
+
+    public List<Supplier> search(String item, ArrayList<Supplier> alreadyVisited) throws InterruptedException {
+        ArrayList<Supplier> possibleSuppliers = new ArrayList<Supplier>();
+        List<Supplier> connections = fetchConnections();
+        alreadyVisited.add(this);
+        if (catalogue.queryp(new ActualField(item)) != null) {
+            System.out.println("\u001B[36m"+name+"\u001B[0m can supply \u001B[32m"+item+"\u001B[0m");
+            possibleSuppliers.add(this);
+        }else {
             Object[] recipe = catalogue.queryp(new ActualField(item), new FormalField(ArrayList.class));
-            ArrayList<String> ingredients = (ArrayList<String>) recipe[1];
-            for (String ingredient : ingredients){
-                initShortestPath(ingredient);
-            }
-            /*
             if (recipe != null) {
                 ArrayList<String> ingredients = (ArrayList<String>) recipe[1];
-                List<Object[]> tosendto = suppliers.queryAll();
-                for (Object[] i : tosendto) {
-                    Supplier s = (Supplier) i[0];
-                    int distance = (int) i[1];
-                    for (String j : ingredients) {
-                        s.supplierRequest(j, 1, this)
+                System.out.println("\u001B[36m"+name+"\u001B[0m needs \u001B[32m"+ingredients+"\u001B[0m to make \u001B[32m"+item+"\u001B[0m");
+                for (Supplier i : connections) {
+                    if (!alreadyVisited.contains(i)) {
+                        for (String u : ingredients) {
+                            List<Supplier> s = i.search(u, alreadyVisited);
+                            List<String> stringified = stringify(s);
+                            System.out.println("\u001B[36m" + stringified + "\u001B[0m can supply " + u + " to \u001B[36m" + name + "\u001B[0m");
+                        }
                     }
-
                 }
-                central.addToInventory(item, amount);
+                possibleSuppliers.add(this);
             }
-
-             */
-        }
-    }
-
-    private void initShortestPath(String item) throws InterruptedException {
-        List<Object[]> adjacentSuppliers = suppliers.queryAll();
-        for (Object[] adj : adjacentSuppliers){
-            Supplier s = (Supplier) adj[0];
-            int distance = (int) adj[1];
-        }
-    }
-
-    public boolean supplierRequest(String item, Integer amount, Supplier supplier) throws InterruptedException {
-        if (catalogue.queryp(new ActualField(item)) != null) {
-            return true;
-        } else {
-            Object[] recipe = catalogue.queryp(new ActualField(item), new FormalField(ArrayList.class));
-            if (recipe != null) {
-                supplierRequest()
-                return
+            if (recipe == null) {
+                for (Supplier i : connections) {
+                    if (!alreadyVisited.contains(i)) {
+                        List<Supplier> s = i.search(item, alreadyVisited);
+                        if (s.isEmpty()) {
+                            System.out.println("\u001B[36m"+ this.name + "\u001B[0m cannot provide \u001B[32m"+ item + "\u001B[0m itself");
+                        }else {
+                            List<String> stringified = stringify(s);
+                            System.out.println("\u001B[36m"+ this.name + "\u001B[0m requested \u001B[32m"+ item + "\u001B[0m from \u001B[36m" + i.name+ "\u001B[0m");
+                            possibleSuppliers.addAll(s);
+                        }
+                    }
+                }
             }
-
         }
+        return possibleSuppliers;
     }
+}
 
-
-    public void run() {
+    /*public void run() {
         /*
         while (true) {
             try{
@@ -86,11 +100,6 @@ public class Supplier implements Runnable {
             }
         }
 
-         */
-    }
 
-
-    public void addAdjacent(Supplier s, Integer i) throws InterruptedException {
-        suppliers.put(s,i);
     }
-}
+        */
