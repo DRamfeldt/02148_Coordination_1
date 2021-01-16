@@ -8,80 +8,98 @@ import java.util.ArrayList;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Queue;
 
 public class Supplier {
     private Space catalogue;                        // (String item) || (String item, ArrayList<String>)
     private Space suppliers = new QueueSpace();                        // Queue space : (Supplier s, int distance)
     public String name;
 
+
     public Supplier(Space catalogue, String name) {
         this.catalogue = catalogue;
         this.name = name;
     }
+
     public void addConnection(Supplier s, int i) throws InterruptedException {
-        suppliers.put(s,i);
+        suppliers.put(s, i);
     }
 
-    private List<Supplier> fetchConnections() throws InterruptedException {
-        List<Object[]> connections = suppliers.queryAll(new FormalField(Supplier.class), new FormalField(Integer.class));
-        List<Supplier> result = new ArrayList<Supplier>();
-        for (Object[] s : connections) {
-            Supplier i = (Supplier) s[0];
-            result.add(i);
-        }
-        return result;
-    }
-
-    private List<String> stringify(List<Supplier> l) {
-        Iterator o = l.iterator();
+    private List<String> stringify(List s) throws InterruptedException {
         List<String> stringified = new ArrayList<>();
-        while(o.hasNext()) {
-            Supplier p = (Supplier) o.next();
-            stringified.add(p.name);
+        Iterator q = s.iterator();
+        while (q.hasNext()) {
+            Object[] p = (Object[]) q.next();
+            Supplier i = (Supplier) p[1];
+            stringified.add(i.name);
         }
         return stringified;
     }
 
-    public List<Supplier> search(String item, ArrayList<Supplier> alreadyVisited) throws InterruptedException {
-        ArrayList<Supplier> possibleSuppliers = new ArrayList<Supplier>();
-        List<Supplier> connections = fetchConnections();
-        alreadyVisited.add(this);
+    public List search(String item, List<Supplier> alreadyVisited, int weight) throws InterruptedException {
+        List possibleSuppliers = new ArrayList();
+        List<Object[]> connections = suppliers.queryAll(new FormalField(Supplier.class), new FormalField(Integer.class));
         if (catalogue.queryp(new ActualField(item)) != null) {
-            System.out.println("\u001B[36m"+name+"\u001B[0m can supply \u001B[32m"+item+"\u001B[0m");
-            possibleSuppliers.add(this);
-        }else {
+            System.out.println("\u001B[36m" + name + "\u001B[0m can supply \u001B[32m" + item + "\u001B[0m");
+            List toAdd = new ArrayList();
+            toAdd.add(alreadyVisited);
+            toAdd.add(this);
+            toAdd.add(weight);
+            possibleSuppliers.add(toAdd);
+        } else {
             Object[] recipe = catalogue.queryp(new ActualField(item), new FormalField(ArrayList.class));
             if (recipe != null) {
-                ArrayList<String> ingredients = (ArrayList<String>) recipe[1];
-                System.out.println("\u001B[36m"+name+"\u001B[0m needs \u001B[32m"+ingredients+"\u001B[0m to make \u001B[32m"+item+"\u001B[0m");
-                for (Supplier i : connections) {
+                List<String> ingredients = (ArrayList<String>) recipe[1];
+                System.out.println("\u001B[36m" + name + "\u001B[0m can supply \u001B[32m" + item + "\u001B[0m but needs \u001B[32m" + ingredients + "\u001B[0m");
+                for (Object[] p : connections) {
+                    Supplier i = (Supplier) p[0];
+                    Integer newWeight = (Integer) p[1];
                     if (!alreadyVisited.contains(i)) {
                         for (String u : ingredients) {
-                            List<Supplier> s = i.search(u, alreadyVisited);
-                            List<String> stringified = stringify(s);
+                            List<Supplier> f = new ArrayList<Supplier>();
+                            f.add(this);
+                            List<String> stringified = stringify(i.search(u, f, newWeight));
                             System.out.println("\u001B[36m" + stringified + "\u001B[0m can supply " + u + " to \u001B[36m" + name + "\u001B[0m");
                         }
                     }
                 }
-                possibleSuppliers.add(this);
+                alreadyVisited.add(this);
+                List toAdd = new ArrayList();
+                toAdd.add(alreadyVisited);
+                toAdd.add(this);
+                toAdd.add(weight);
+                possibleSuppliers.add(toAdd);
             }
             if (recipe == null) {
-                for (Supplier i : connections) {
+                alreadyVisited.add(this);
+                System.out.println("\u001B[36m" + name + "\u001B[0m cannot make \u001B[32m" + item + "\u001B[0m");
+                for (Object[] p : connections) {
+                    Supplier i = (Supplier) p[0];
+                    Integer newWeight = (Integer) p[1];
                     if (!alreadyVisited.contains(i)) {
-                        List<Supplier> s = i.search(item, alreadyVisited);
-                        if (s.isEmpty()) {
-                            System.out.println("\u001B[36m"+ this.name + "\u001B[0m cannot provide \u001B[32m"+ item + "\u001B[0m itself");
-                        }else {
-                            List<String> stringified = stringify(s);
-                            System.out.println("\u001B[36m"+ this.name + "\u001B[0m requested \u001B[32m"+ item + "\u001B[0m from \u001B[36m" + i.name+ "\u001B[0m");
-                            possibleSuppliers.addAll(s);
-                        }
+                        System.out.println("\u001B[36m" + name + "\u001B[0m requested \u001B[32m" + item + "\u001B[0m from \u001B[36m" + i.name + "\u001B[0m");
+                        List resend = i.search(item, alreadyVisited, weight + newWeight);
+                        possibleSuppliers.addAll(resend);
                     }
                 }
             }
         }
         return possibleSuppliers;
     }
+
+
+
+    /*public void initDijkstra(ArrayList<Supplier> alreadyInit) throws InterruptedException {
+        alreadyInit.add(this);
+        this.l=1000000;
+        List<Supplier> toInit = fetchConnections();
+        toInit.removeAll(alreadyInit);
+        Iterator o = toInit.iterator();
+        while(o.hasNext()) {
+            Supplier u = (Supplier) o.next();
+            u.initDijkstra(alreadyInit);
+        }
+    }*/
 }
 
     /*public void run() {
