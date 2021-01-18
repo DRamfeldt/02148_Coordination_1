@@ -89,17 +89,7 @@ public class Supplier {
 
 
 
-    /*public void initDijkstra(ArrayList<Supplier> alreadyInit) throws InterruptedException {
-        alreadyInit.add(this);
-        this.l=1000000;
-        List<Supplier> toInit = fetchConnections();
-        toInit.removeAll(alreadyInit);
-        Iterator o = toInit.iterator();
-        while(o.hasNext()) {
-            Supplier u = (Supplier) o.next();
-            u.initDijkstra(alreadyInit);
-        }
-    }*/
+
 }
 
     /*public void run() {

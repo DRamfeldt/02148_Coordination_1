@@ -41,18 +41,24 @@ public class Central {
 
                 List<String> stringified = new ArrayList<>();
                 suppliersWithItem.put(endGoal, weight);
+                Iterator routeI = route.iterator();
+                while(routeI.hasNext()) {
+                    Supplier routeN = (Supplier) routeI.next();
+                    stringified.add(routeN.name);
+                }
 
-                System.out.println("Possible supplier found : \u001B[32m" + endGoal.name +
+                System.out.println("\u001B[35mPossible supplier \u001B[0mfound : \u001B[32m" + endGoal.name +
                         "\u001B[0m to provide \u001B[36m" + item +
                         "\u001B[0m with weight " + weight +
-                        "\u001B[0m.");
+                        "\u001B[0m. on route "+stringified);
                 if (min>weight) {
+                    min=weight;
                     best=endGoal;
                 }
             }
         }
         System.out.println("Best supplier found: \u001B[32m" + best.name +
-                "\u001B[0m to provide "+amount+" \u001B[36m" + item + "\u001B[0m");
+                "\u001B[0m to provide "+amount+" \u001B[36m" + item + "\u001B[0m with weight "+min);
         Object[] actual = inventory.getp(new ActualField(item),new FormalField(int.class));
         if (actual!=null) {
             int currentAmount = (int) actual[1];
