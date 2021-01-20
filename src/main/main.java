@@ -36,6 +36,7 @@ public class main {
         new Thread(Netto).start();
 
         */
+
         Space arla = new SequentialSpace();
         arla.put("milk");
         arla.put("yogurt");
@@ -72,29 +73,29 @@ public class main {
         Supplier Kellogs = new Supplier(kellogs,"Kellogs");
 
         Stryhns.addConnection(Kellogs,5);
-        Stryhns.addConnection(Heinz,2);
-        Heinz.addConnection(Stryhns,2);
-        //Heinz.addConnection(RitterSport,2);
+        Stryhns.addConnection(Heinz,10);
+        Heinz.addConnection(Stryhns,10);
+        Heinz.addConnection(RitterSport,2);
         Heinz.addConnection(Kellogs,2);
         Kellogs.addConnection(Stryhns,5);
         Kellogs.addConnection(Heinz,2);
         Kellogs.addConnection(Smirnoff,1);
-        //RitterSport.addConnection(Heinz,2);
-        //RitterSport.addConnection(Arla,2);
+        RitterSport.addConnection(Heinz,2);
+        RitterSport.addConnection(Arla,2);
         Smirnoff.addConnection(Kellogs,1);
         Smirnoff.addConnection(Hansens,2);
         Smirnoff.addConnection(Marabou,5);
-        //Hansens.addConnection(Egelykke,7);
+        Hansens.addConnection(Egelykke,7);
         Hansens.addConnection(Smirnoff,2);
-        //Egelykke.addConnection(KarenVolf,1);
-        //Egelykke.addConnection(Hansens,7);
-        //Egelykke.addConnection(Arla,5);
-        //Arla.addConnection(Egelykke,5);
-        //Arla.addConnection(RitterSport,2);
-        //KarenVolf.addConnection(Egelykke,1);
+        Egelykke.addConnection(KarenVolf,1);
+        Egelykke.addConnection(Hansens,7);
+        Egelykke.addConnection(Arla,5);
+        Arla.addConnection(Egelykke,5);
+        Arla.addConnection(RitterSport,2);
+        KarenVolf.addConnection(Egelykke,1);
         Marabou.addConnection(Smirnoff,5);
 
-        Tuple centralNeighbors = new Tuple(Stryhns);//,Hansens);
+        Tuple centralNeighbors = new Tuple(Stryhns,Hansens);
         Central c = new Central(centralNeighbors);
 
         Arla.setCentral(c);
@@ -111,28 +112,29 @@ public class main {
         Space inventory = new SequentialSpace();
 
         Store s = new Store(inventory,inventory,c);
-        //(new Thread(Arla)).start();
-        //(new Thread(RitterSport)).start();
+        (new Thread(Arla)).start();
+        (new Thread(RitterSport)).start();
         (new Thread(Heinz)).start();
         (new Thread(Stryhns)).start();
         (new Thread(Kellogs)).start();
         (new Thread(Smirnoff)).start();
         (new Thread(Marabou)).start();
         (new Thread(Hansens)).start();
-        //(new Thread(Egelykke)).start();
-        //(new Thread(KarenVolf)).start();
+        (new Thread(Egelykke)).start();
+        (new Thread(KarenVolf)).start();
 
 
         (new Thread(c)).start();
-        c.request("ketchup",5,s);
+        c.request("milk",5,s);
         /*Thread.sleep(2000);
         System.out.println("==========================");
         c.request("chocolate",1,s);
         Thread.sleep(2000);
         System.out.println("==========================");
         c.request("vodka",3,s);
-        Thread.sleep(2000);
+        Thread.sleep(20000);
         System.out.println("==========================");*/
-
+        Thread.sleep(6000);
+        System.exit(0);
     }
 }

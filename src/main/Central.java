@@ -40,11 +40,11 @@ public class Central implements Runnable {
         return stringified;
     }
 
-    public void routeFound(String item, List<Supplier> route, int amount, int weight) throws InterruptedException {
+    public void routeFound(String item, List<Supplier> route, int weight) throws InterruptedException {
         System.out.println("\u001B[35mPossible route \u001B[0mfound : \u001B[32m" + stringify(route) +
-                "\u001B[0m to provide \u001B[36m" + amount + " "+item +
-                "\u001B[0m with weight \u001B[31m"+weight+"\u001B[0m");
-        centralRequests.put(item,route, amount, weight);
+                "\u001B[0m to provide \u001B[36m" + item +
+                "\u001B[0m with weight \u001B[31m" + weight + "\u001B[0m");
+        centralRequests.put(item, route, weight);
     }
 
     public void request(String item, Integer amount, Store s) throws InterruptedException {
@@ -52,16 +52,16 @@ public class Central implements Runnable {
         System.out.println("Store requested for " + amount + " \u001B[36m" + item + "\u001B[0m");
     }
 
-    public void supplierRequest(String item, Integer amount) throws InterruptedException {
+    public void supplierRequest(String item, Store s, Integer a) throws InterruptedException {
         Iterator o = suppliers.iterator();
         while (o.hasNext()) {
             Supplier currentSupplier = (Supplier) o.next();
             System.out.println("\u001B[31mCentral \u001B[0mrequest sent to \u001B[32m" +
                     currentSupplier.name + "\u001B[0m for \u001B[36m" +
                     item + "\u001B[0m");
-            currentSupplier.sendRequest(item, new ArrayList<Supplier>(), 0, new ArrayList<Supplier>(),amount);
+            currentSupplier.sendRequest(item, new ArrayList<Supplier>(), 0, new ArrayList<Supplier>());
         }
-        awaitingRequests.put(item, amount);
+        awaitingRequests.put(item,s,a);
     }
 
     public void run() {
@@ -74,41 +74,47 @@ public class Central implements Runnable {
                     Integer amount = (Integer) req[1];
                     Store store = (Store) req[2];
                     req = inventory.getp(new ActualField(item), new FormalField(Integer.class));
-                    if (req!=null) {
+                    if (req != null) {
                         int inventoryAmount = (int) req[1];
                         if (inventoryAmount > amount) {
                             inventory.put(item, inventoryAmount - amount);
                             store.addToInventory(item, amount);
                         } else {
                             inventory.put(item, inventoryAmount);
-                            supplierRequest(item, amount - inventoryAmount);
+                            supplierRequest(item,store,amount);
                             inventoryAmount = (int) req[1];
                             inventory.put(item, inventoryAmount - amount);
-                            store.addToInventory(item, amount);
                         }
-                    }else {
-                        supplierRequest(item, amount);
+                    } else {
+                        supplierRequest(item,store,amount);
 
                     }
                 }
-                req = awaitingRequests.getp(new FormalField(String.class), new FormalField(Integer.class));
-                if (req!=null) {
+                req = awaitingRequests.getp(new FormalField(String.class), new FormalField(Store.class), new FormalField(Integer.class));
+                if (req != null) {
                     String item = (String) req[0];
-                    int amount = (int) req[1];
-                    int amountOfRequests = suppliers.length();
+                    int time = 25;
                     int weight = 10000000;
+                    Store s = (Store) req[1];
+                    int amount = (int) req[2];
                     List<Supplier> route = new ArrayList<Supplier>();
-                    while(amountOfRequests>0) {
-                        req = centralRequests.get(new ActualField(item), new FormalField(List.class), new ActualField(amount), new FormalField(Integer.class));
-                        if ((int) req[3]<weight) {
-                            weight=(int) req[3];
-                            route = (List<Supplier>) req[1];
+                    while (time > 0) {
+                        req = centralRequests.getp(new ActualField(item),
+                                new FormalField(List.class),
+                                new FormalField(Integer.class));
+                        if (req != null) {
+                            if ((int) req[2] < weight) {
+                                weight = (int) req[2];
+                                route = (List<Supplier>) req[1];
+                            }
                         }
-                        amountOfRequests--;
+                        Thread.sleep(100);
+                        time--;
                     }
                     System.out.println("\u001B[35mOptimal route \u001B[0mfound : \u001B[32m" + stringify(route) +
-                            "\u001B[0m to provide \u001B[36m" + amount + " "+item +
-                            "\u001B[0m with weight \u001B[31m"+weight+"\u001B[0m");
+                            "\u001B[0m to provide \u001B[36m" + item +
+                            "\u001B[0m with weight \u001B[31m" + weight + "\u001B[0m");
+                    s.addToInventory(item, amount);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
