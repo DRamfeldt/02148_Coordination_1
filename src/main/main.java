@@ -36,79 +36,103 @@ public class main {
         new Thread(Netto).start();
 
         */
-        ArrayList<String> o = new ArrayList<String>();
-        Space arlaProducts = new SequentialSpace();
-        Space egelykkeProducts = new SequentialSpace();
-        Space plasticProducts = new SequentialSpace();
-        Space oilProducts = new SequentialSpace();
-        Space stickers = new SequentialSpace();
-        Space woodProducts = new SequentialSpace();
-        Space ikea = new SequentialSpace();
+        Space arla = new SequentialSpace();
+        arla.put("milk");
+        arla.put("yogurt");
+        Space egelykke = new SequentialSpace();
+        egelykke.put("milk");
+        egelykke.put("icecream");
+        egelykke.put("cheese");
+        Space stryhns = new SequentialSpace();
+        stryhns.put("leverpostej");
+        Space karenvolf = new SequentialSpace();
+        karenvolf.put("snoefler");
+        Space marabou = new SequentialSpace();
+        marabou.put("chocolate");
+        Space rittersport = new SequentialSpace();
+        rittersport.put("chocolate");
+        Space hansens = new SequentialSpace();
+        hansens.put("icecream");
+        Space smirnoff = new SequentialSpace();
+        smirnoff.put("vodka");
+        Space heinz = new SequentialSpace();
+        heinz.put("ketchup");
+        Space kellogs = new SequentialSpace();
+        kellogs.put("corn flakes");
 
+        Supplier Arla = new Supplier(arla,"Arla");
+        Supplier Egelykke = new Supplier(egelykke,"Egelykke");
+        Supplier Stryhns = new Supplier(stryhns,"Stryhns");
+        Supplier KarenVolf = new Supplier(karenvolf,"Karen Volf");
+        Supplier Marabou = new Supplier(marabou, "Marabou");
+        Supplier RitterSport = new Supplier(rittersport,"Ritter Sport");
+        Supplier Hansens = new Supplier(hansens,"Hansens flødeis");
+        Supplier Smirnoff = new Supplier(smirnoff,"Smirnoff");
+        Supplier Heinz = new Supplier(heinz,"Heinz");
+        Supplier Kellogs = new Supplier(kellogs,"Kellogs");
 
-        o = new ArrayList<String>();
-        o.add("plastic");
-        o.add("sticker");
-        plasticProducts.put("container",o);
+        Stryhns.addConnection(Kellogs,5);
+        Stryhns.addConnection(Heinz,2);
+        Heinz.addConnection(Stryhns,2);
+        //Heinz.addConnection(RitterSport,2);
+        Heinz.addConnection(Kellogs,2);
+        Kellogs.addConnection(Stryhns,5);
+        Kellogs.addConnection(Heinz,2);
+        Kellogs.addConnection(Smirnoff,1);
+        //RitterSport.addConnection(Heinz,2);
+        //RitterSport.addConnection(Arla,2);
+        Smirnoff.addConnection(Kellogs,1);
+        Smirnoff.addConnection(Hansens,2);
+        Smirnoff.addConnection(Marabou,5);
+        //Hansens.addConnection(Egelykke,7);
+        Hansens.addConnection(Smirnoff,2);
+        //Egelykke.addConnection(KarenVolf,1);
+        //Egelykke.addConnection(Hansens,7);
+        //Egelykke.addConnection(Arla,5);
+        //Arla.addConnection(Egelykke,5);
+        //Arla.addConnection(RitterSport,2);
+        //KarenVolf.addConnection(Egelykke,1);
+        Marabou.addConnection(Smirnoff,5);
 
-        woodProducts.put("legs");
-
-        o = new ArrayList<String>();
-        o.add("legs");
-        ikea.put("table",o);
-
-        oilProducts.put("plastic");
-
-        stickers.put("sticker");
-
-        egelykkeProducts.put("milk");
-
-        o = new ArrayList<String>();
-        o.add("container");
-        arlaProducts.put("yogurt", o);
-        arlaProducts.put("milk");
-
-        Supplier StickerFactory = new Supplier(stickers, "Sticker Factory");
-        Supplier PlasticFactory = new Supplier(plasticProducts, "Plastic Factory");
-        Supplier Arla = new Supplier(arlaProducts, "Arla");
-        Supplier Egelykke = new Supplier(egelykkeProducts, "Egelykke");
-        Supplier Ikea = new Supplier(ikea,"Ikea");
-        Supplier Refinery1 = new Supplier(oilProducts, "Refinery 1");
-        Supplier Refinery2 = new Supplier(oilProducts, "Refinery 2");
-        Supplier Woodshop1 = new Supplier(woodProducts, "Woodshop 1");
-        Supplier Woodshop2 = new Supplier(woodProducts, "Woodshop 2");
-
-        Arla.addConnection(StickerFactory,5);
-        Refinery1.addConnection(StickerFactory, 9);
-        Refinery1.addConnection(Egelykke,1);
-        Egelykke.addConnection(Ikea,4);
-        Egelykke.addConnection(Refinery1,1);
-        Egelykke.addConnection(Woodshop1,15);
-        Woodshop1.addConnection(Egelykke,15);
-        Ikea.addConnection(Egelykke,4);
-        StickerFactory.addConnection(PlasticFactory,4);
-        StickerFactory.addConnection(Refinery2,2);
-        StickerFactory.addConnection(Woodshop2,1);
-        StickerFactory.addConnection(Arla,5);
-        StickerFactory.addConnection(Refinery1,9);
-        Woodshop2.addConnection(StickerFactory,1);
-        Refinery2.addConnection(StickerFactory,2);
-        PlasticFactory.addConnection(StickerFactory,4);
-
-
-
-
-        Tuple centralNeighbors = new Tuple(Arla,Refinery1,Ikea);
+        Tuple centralNeighbors = new Tuple(Stryhns);//,Hansens);
         Central c = new Central(centralNeighbors);
 
+        Arla.setCentral(c);
+        Egelykke.setCentral(c);
+        Hansens.setCentral(c);
+        Smirnoff.setCentral(c);
+        RitterSport.setCentral(c);
+        Kellogs.setCentral(c);
+        Heinz.setCentral(c);
+        Stryhns.setCentral(c);
+        Marabou.setCentral(c);
+        KarenVolf.setCentral(c);
+
+        Space inventory = new SequentialSpace();
+
+        Store s = new Store(inventory,inventory,c);
+        //(new Thread(Arla)).start();
+        //(new Thread(RitterSport)).start();
+        (new Thread(Heinz)).start();
+        (new Thread(Stryhns)).start();
+        (new Thread(Kellogs)).start();
+        (new Thread(Smirnoff)).start();
+        (new Thread(Marabou)).start();
+        (new Thread(Hansens)).start();
+        //(new Thread(Egelykke)).start();
+        //(new Thread(KarenVolf)).start();
+
+
+        (new Thread(c)).start();
+        c.request("ketchup",5,s);
+        /*Thread.sleep(2000);
         System.out.println("==========================");
-        c.supplierRequest("sticker",5);
+        c.request("chocolate",1,s);
+        Thread.sleep(2000);
         System.out.println("==========================");
-        c.supplierRequest("container",1);
-        System.out.println("==========================");
-        c.supplierRequest("milk",3);
-        System.out.println("==========================");
-        c.supplierRequest("plastic",1000);
+        c.request("vodka",3,s);
+        Thread.sleep(2000);
+        System.out.println("==========================");*/
 
     }
 }
