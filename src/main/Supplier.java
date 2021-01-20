@@ -46,7 +46,7 @@ public class Supplier implements Runnable {
     }
 
 
-    public void search(String item, List<Supplier> alreadyVisited, int weight, int amount) throws InterruptedException {
+    public void search(String item, List<Supplier> alreadyVisited, int weight, List<Supplier> route, int amount) throws InterruptedException {
         List<Object[]> connectiOri = suppliers.queryAll(new FormalField(Supplier.class), new FormalField(Integer.class));
         List<Object[]> connections = new ArrayList<>(connectiOri);
         alreadyVisited.add(this);
@@ -56,31 +56,30 @@ public class Supplier implements Runnable {
                 connections.remove(i);
             }
         }
+        System.out.println(c.stringify2(connections)+" "+c.stringify(alreadyVisited));
         if (catalogue.queryp(new ActualField(item)) != null) {
-            List<Supplier> wayBack = new ArrayList<Supplier>(alreadyVisited);
-            wayBack.remove(wayBack.size() - 1);
-            wayBack.get(wayBack.size()-1).sendCentralRequest(item, wayBack, weight, alreadyVisited, amount);
-            System.out.println(Green + name + Purple + " can and is supplying " + Cyan + amount + " " + item + Reset +" to "+Green + wayBack.get(wayBack.size()-1).name + Reset);
+            List<Supplier> wayBack = new ArrayList<Supplier>(route);
+            wayBack.get(wayBack.size()-1).sendCentralRequest(item, wayBack, weight, route, amount);
+            System.out.println(Green + name + Purple + " is supplying " + Cyan + amount + " " + item + Reset +" to "+Green + wayBack.get(wayBack.size()-1).name + Reset);
         } else {
             if (connections.isEmpty()) {
-                List<Supplier> wayBack = new ArrayList<Supplier>(alreadyVisited);
-                wayBack.remove(wayBack.size() - 1);
-                wayBack.get(wayBack.size()-1).sendCentralRequest(item, wayBack, 10005000, alreadyVisited, amount);
+                List<Supplier> wayBack = new ArrayList<Supplier>(route);
+                wayBack.get(wayBack.size()-1).sendCentralRequest(item, wayBack, 10005000, route, amount);
                 System.out.println(Green + name + Reset + " cannot supply " + Cyan + item + Reset + " and doesn't have any other suppliers, sending back to "+Green + wayBack.get(wayBack.size()-1).name + Reset);
             } else {
                 int requestsSent = 0;
-                System.out.println(Green + name + Reset + " cannot supply " + Cyan + item + Reset);
+                route.add(this);
                 for (Object[] p : connections) {
                     Supplier i = (Supplier) p[0];
                     Integer newWeight = (Integer) p[1];
                     if (!alreadyVisited.contains(i)) {
                         requestsSent++;
-                        System.out.println(Green + name + Reset + " requested " + Cyan + amount + " " + item + Reset + " from " + Green + i.name + Reset);
-                        i.sendRequest(item, alreadyVisited, weight + newWeight, alreadyVisited, amount);
+                        System.out.println(Green + name + Reset + " cannot supply " + Cyan +amount+" "+ item + Reset + " but requested from " + Green + i.name + Reset);
+                        i.sendRequest(item, alreadyVisited, weight + newWeight, route, amount);
                     }
                 }
                 if (requestsSent>0) {
-                    System.out.println(Green + name + Purple + " return requested self for " + Cyan + item + Reset);
+                    System.out.println(Green + name + Purple + " is waiting for "+requestsSent+" requests for " + Cyan + item + Reset+" to return");
                     awaitingRequests.put(item, amount, requestsSent);
                 }
             }
@@ -96,7 +95,7 @@ public class Supplier implements Runnable {
         int weight = 10000000;
         List<Supplier> route = new ArrayList<Supplier>();
         List<Supplier> wayBack = new ArrayList<Supplier>();
-        boolean wayBackInit=false;
+        boolean waiting =false;
         while (true) {
             try {
 
@@ -113,18 +112,20 @@ public class Supplier implements Runnable {
                     route = (List<Supplier>) req[3];
                     amount = (int) req[4];
                     System.out.println(Green + name + Reset + " has received request for " + Cyan + item + Reset);
-                    search(item, alreadyVisited, weight, amount);
+                    search(item, alreadyVisited, weight, route, amount);
                 }
 
-
-                req = awaitingRequests.getp(new FormalField(String.class),
-                        new FormalField(Integer.class),
-                        new FormalField(Integer.class));
-                if (req != null) {
-                    item = (String) req[0];
-                    amount = (int) req[1];
-                    amountOfRequests = (int) req[2];
-                    System.out.println(Green + name + Reset + " is wiring " + amountOfRequests + " requests for " + Cyan + item + Reset);
+                if (!waiting) {
+                    req = awaitingRequests.getp(new FormalField(String.class),
+                            new FormalField(Integer.class),
+                            new FormalField(Integer.class));
+                    if (req != null) {
+                        waiting= true;
+                        item = (String) req[0];
+                        amount = (int) req[1];
+                        amountOfRequests = (int) req[2];
+                        System.out.println(Green + name + Reset + " is wiring " + amountOfRequests + " requests for " + Cyan + item + Reset);
+                    }
                 }
 
 
@@ -134,33 +135,30 @@ public class Supplier implements Runnable {
                         new FormalField(List.class),
                         new ActualField(amount));
                 if (req!=null) {
-                    System.out.println(name+" \nroute:"+c.stringify((List<Supplier>) req[3])+" \nwayBack"+c.stringify((List<Supplier>) req[1])+" \nweight : "+req[2]+" remaining reqs:"+amountOfRequests+" "+item);
+                    System.out.println("FIRE!!!"+amountOfRequests);
                     amountOfRequests--;
                     if ((int) req[2] < weight) {
                         weight = (int) req[2];
                         wayBack = (List<Supplier>) req[1];
                         route = (List<Supplier>) req[3];
-                        wayBackInit=true;
                     }
-                }
-
-
-                if (amountOfRequests<1 && wayBackInit) {
-                    if (wayBack.size() <2) {
-                        System.out.println("EARLY FIRE"+wayBack.size());
-                        c.routeFound(item, route, amount, weight);
-                    } else {
-                        Supplier wb = wayBack.get(wayBack.size() - 1);
-                        System.out.println(Green + name + Reset + " has returned request to " + Green + wb.name + Reset);
-                        wb.sendCentralRequest(item, wayBack, weight, route, amount);
+                    if (amountOfRequests==0) {
+                        if (wayBack.size()==0) {
+                            System.out.println("EARLY FIRE");
+                            c.routeFound(item, route, amount, weight);
+                        }else{
+                            Supplier wb = wayBack.get(wayBack.size() - 1);
+                            System.out.println(Green + name + Reset + " has returned request to " + Green + wb.name + Reset);
+                            wb.sendCentralRequest(item, wayBack, weight, route, amount);
+                        }
+                        item ="";
+                        amount =0;
+                        amountOfRequests=10000;
+                        weight = 10000000;
+                        route = new ArrayList<Supplier>();
+                        wayBack = new ArrayList<Supplier>();
+                        waiting = false;
                     }
-                    item ="";
-                    amount =0;
-                    amountOfRequests=10000;
-                    weight = 10000000;
-                    route = new ArrayList<Supplier>();
-                    wayBack = new ArrayList<Supplier>();
-                    wayBackInit = false;
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
