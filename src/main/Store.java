@@ -7,12 +7,14 @@ public class Store {
     private Central central;
     private Space inventory;
     private Space standardInv;
+    private String name;
 
 
-    public Store(Space inventory, Space standardInv, Central c) {   // Creates new inventory for a given store
+    public Store(Space inventory, Space standardInv, Central c, String name) {   // Creates new inventory for a given store
         this.inventory = inventory;
         this.standardInv = standardInv;
         central = c;
+        this.name = name;
     }
 
     public void addToInventory(String Item, Integer Amount) throws InterruptedException {
@@ -42,4 +44,9 @@ public class Store {
         }
 
     }
+
+    public String getName() {
+        return name;
+    }
+
 }
