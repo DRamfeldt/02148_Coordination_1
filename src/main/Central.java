@@ -83,7 +83,6 @@ public class Central implements Runnable {
                             inventory.put(item, inventoryAmount);
                             supplierRequest(item,store,amount);
                             inventoryAmount = (int) req[1];
-                            inventory.put(item, inventoryAmount - amount);
                         }
                     } else {
                         supplierRequest(item,store,amount);

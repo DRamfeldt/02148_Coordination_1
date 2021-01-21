@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 public class Main {
 
     public static void main(String[] args){
+
         final JFrame f = new JFrame("Store Overview");
 
         // Show frame

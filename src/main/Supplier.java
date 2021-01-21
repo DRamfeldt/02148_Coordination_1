@@ -45,7 +45,6 @@ public class Supplier implements Runnable {
         List<Supplier> alreadyVisited = new ArrayList<Supplier>(aV);
         List<Supplier> route = new ArrayList<Supplier>(rT);
         alreadyVisited.add(this);
-        //System.out.println(c.stringify2(connections) + " " + c.stringify(alreadyVisited));
         if (catalogue.queryp(new ActualField(item)) != null) {
             route.add(this);
             System.out.println(Green + name + Purple + " can supply " + Cyan + item + Reset);
