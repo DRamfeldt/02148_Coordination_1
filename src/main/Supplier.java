@@ -75,9 +75,9 @@ public class Supplier implements Runnable {
 
 
     public void run() {
+        Object req[];
         while (true) {
             try {
-                Object req[];
                 req = requests.getp(new FormalField(String.class),
                         new FormalField(List.class),
                         new FormalField(Integer.class),

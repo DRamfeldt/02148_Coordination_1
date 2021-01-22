@@ -15,9 +15,6 @@ public class Central implements Runnable {
         this.suppliers = suppliers;
     }
 
-    public void addToInventory(String item, Integer amount) throws InterruptedException {
-        inventory.put(item, amount);
-    }
 
     public List<String> stringify(List s) throws InterruptedException {
         List<String> stringified = new ArrayList<>();
@@ -43,7 +40,7 @@ public class Central implements Runnable {
     public void routeFound(String item, List<Supplier> route, int weight) throws InterruptedException {
         System.out.println("\u001B[35mPossible route \u001B[0mfound : \u001B[32m" + stringify(route) +
                 "\u001B[0m to provide \u001B[36m" + item +
-                "\u001B[0m with weight \u001B[31m" + weight + "\u001B[0m");
+                "\u001B[0m with cost \u001B[31m" + weight + "\u001B[0m");
         centralRequests.put(item, route, weight);
     }
 
@@ -112,7 +109,7 @@ public class Central implements Runnable {
                     }
                     System.out.println("\u001B[35mOptimal route \u001B[0mfound : \u001B[32m" + stringify(route) +
                             "\u001B[0m to provide \u001B[36m" + item +
-                            "\u001B[0m with weight \u001B[31m" + weight + "\u001B[0m");
+                            "\u001B[0m with cost \u001B[31m" + weight + "\u001B[0m");
                     s.addToInventory(item, amount);
                 }
             } catch (InterruptedException e) {

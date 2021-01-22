@@ -9,13 +9,14 @@ public class Store {
     private Space standardInv;
     private String name;
 
-
     public Store(Space inventory, Space standardInv, Central c, String name) {   // Creates new inventory for a given store
         this.inventory = inventory;
         this.standardInv = standardInv;
         central = c;
         this.name = name;
     }
+
+    public Space getInventory(){ return inventory; }
 
     public void addToInventory(String Item, Integer Amount) throws InterruptedException {
         inventory.put(Item, Amount);
